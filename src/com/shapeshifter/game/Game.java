@@ -8,6 +8,7 @@ import java.awt.image.BufferStrategy;
 import javax.swing.JFrame;
 
 import com.shapeshifter.gfx.Screen;
+import com.shapeshifter.world.Level;
 
 public class Game extends Canvas implements Runnable {
 
@@ -23,8 +24,11 @@ public class Game extends Canvas implements Runnable {
 	private Screen screen;
 	private BufferStrategy bs;
 	
+	private Level level;
+	
 	public Game() {
 		this.screen = new Screen(this.width / scale, this.height / scale);
+		this.level = new Level(16, 16);
 		
 		this.init();
 	}
@@ -69,6 +73,8 @@ public class Game extends Canvas implements Runnable {
 		System.exit(0);
 	}
 	
+	int xo = 0, yo = 0;
+	
 	private void render() {
 		this.bs = this.getBufferStrategy();
 		if(this.bs == null) {
@@ -76,8 +82,10 @@ public class Game extends Canvas implements Runnable {
 			return;
 		}
 		
+		this.screen.setOffset(xo, yo);
+		
 		this.screen.fill(0xff000000);
-		this.screen.render(0, 0, 16, 16, 0xffff0000);
+		this.level.render(this.screen);
 		
 		Graphics g = bs.getDrawGraphics();
 		g.fillRect(0, 0, this.width / scale, this.height / scale);
@@ -88,7 +96,8 @@ public class Game extends Canvas implements Runnable {
 	}
 	
 	private void update() {
-		
+		xo--;
+		yo--;
 	}
 	
 	public static void main(String[] argc) {

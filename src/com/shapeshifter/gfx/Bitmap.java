@@ -23,6 +23,10 @@ public class Bitmap {
 			for(int j = 0; j < h; j++) {
 				int posX = i + x;
 				int posY = j + y;
+				if(posX < 0) posX = 0;
+				if(posY < 0) posY = 0;
+				if(posX >= this.width) break;
+				if(posY >= this.height) break;
 				this.pixels[posX + posY * this.width] = color;
 			}
 		}
