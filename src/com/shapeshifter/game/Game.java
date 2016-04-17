@@ -8,7 +8,10 @@ import java.awt.image.BufferStrategy;
 import javax.swing.JFrame;
 
 import com.shapeshifter.gfx.Screen;
-import com.shapeshifter.world.Level;
+import com.shapeshifter.gui.MainScene;
+import com.shapeshifter.gui.Scene;
+import com.shapeshifter.gui.WinScene;
+import com.shapeshifter.utils.InputHandler;
 
 public class Game extends Canvas implements Runnable {
 
@@ -23,14 +26,14 @@ public class Game extends Canvas implements Runnable {
 	
 	private Screen screen;
 	private BufferStrategy bs;
+	public static final InputHandler INPUT = new InputHandler();
 	
-	private Level level;
+	
+	private Scene scene;
 	
 	public Game() {
 		this.screen = new Screen(this.width / scale, this.height / scale);
-		this.level = new Level(16, 16);
-		
-		this.init();
+		this.scene = new MainScene(this);
 	}
 	
 	private void init() {
@@ -46,6 +49,8 @@ public class Game extends Canvas implements Runnable {
 		this.window.setLocationRelativeTo(null);
 		this.window.setResizable(false);
 		this.window.setVisible(true);
+		
+		this.addKeyListener(INPUT);
 	}
 	
 	public synchronized void start() {
@@ -66,14 +71,37 @@ public class Game extends Canvas implements Runnable {
 	
 	@Override
 	public void run() {
+		long lastTime = System.nanoTime();
+		double delta = 0;
+		double nsPerTick = 1000000000.0 / 60.0;
+		int frames = 0;
+		int ticks = 0;
+		long timer = System.currentTimeMillis();
+		
+		this.init();
+		
 		while(this.run) {
+			long now = System.nanoTime();
+			delta += (now - lastTime) / nsPerTick;
+			lastTime = now;
+			while(delta >= 1) {
+				ticks++;
+				this.update(delta);
+				delta -= 1;
+			}
+			
+			frames++;
 			this.render();
-			this.update();
+			
+			if(System.currentTimeMillis() - timer > 1000) {
+				timer += 1000;
+//				System.out.println(ticks + " ticks, " + frames + " fps");
+				frames = 0;
+				ticks = 0;
+			}
 		}
 		System.exit(0);
 	}
-	
-	int xo = 0, yo = 0;
 	
 	private void render() {
 		this.bs = this.getBufferStrategy();
@@ -82,10 +110,8 @@ public class Game extends Canvas implements Runnable {
 			return;
 		}
 		
-		this.screen.setOffset(xo, yo);
-		
 		this.screen.fill(0xff000000);
-		this.level.render(this.screen);
+		this.scene.render(this.screen);
 		
 		Graphics g = bs.getDrawGraphics();
 		g.fillRect(0, 0, this.width / scale, this.height / scale);
@@ -95,9 +121,12 @@ public class Game extends Canvas implements Runnable {
 		bs.show();
 	}
 	
-	private void update() {
-		xo--;
-		yo--;
+	private void update(double delta) {
+		this.scene.update();
+	}
+	
+	public void setScene(Scene scene) {
+		this.scene = scene;
 	}
 	
 	public static void main(String[] argc) {

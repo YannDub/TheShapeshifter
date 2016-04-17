@@ -3,8 +3,6 @@ package com.shapeshifter.gfx;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
-import com.shapeshifter.world.tiles.Tile;
-
 public class Screen extends Bitmap {
 	
 	private BufferedImage image;
@@ -12,7 +10,7 @@ public class Screen extends Bitmap {
 	
 	public Screen(int width, int height) {
 		super(width, height);
-		this.image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
+		this.image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
 		this.pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 	}
 	
@@ -21,12 +19,24 @@ public class Screen extends Bitmap {
 		this.yOffset = -yOffset;
 	}
 	
-	public void renderTile(int x, int y, Tile tile) {
-		this.render(x * 16 + xOffset, y * 16 + xOffset, Tile.SIZE, Tile.SIZE, tile.getColor());
+	public void renderBitmap(int x, int y, Bitmap bitmap) {
+		super.renderBitmap(x + xOffset, y + yOffset, bitmap);
+	}
+	
+	public void renderImage(int x, int y, Bitmap bitmap) {
+		super.renderBitmap(x, y, bitmap);
 	}
 	
 	public BufferedImage getImage() {
 		return this.image;
+	}
+	
+	public int getXOffset() {
+		return this.xOffset;
+	}
+	
+	public int getYOffset() {
+		return this.yOffset;
 	}
 
 }
